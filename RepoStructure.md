@@ -34,19 +34,16 @@ The repository bridges the gap between software SNN execution and physical hardw
 
 
 * **Non-Ideality-Aware Weight Encoding (Algorithm 1):**
-* 
-**Theory:** To protect analog crossbars against destructive noise, signed weights are converted to positive integers by determining a bit-shift ceiling factor $p = \lceil \log_2(\min(|W_{ideal}|)) \rceil$, shifting negative weights by adding $2^p$, and executing a fully digital subtraction via a hardware **DIFF module** downstream.
+* **Theory:** To protect analog crossbars against destructive noise, signed weights are converted to positive integers by determining a bit-shift ceiling factor $p = \lceil \log_2(\min(|W_{ideal}|)) \rceil$, shifting negative weights by adding $2^p$, and executing a fully digital subtraction via a hardware **DIFF module** downstream.
 
 
-* 
-**Code Implementation:** Handled in the preprocessing and quantization steps inside the inference pipeline files of `NICE` (typically named `hw_inference.py` or `quantize.py`), where weights are mapped onto absolute positive ranges prior to noise injection.
+* **Code Implementation:** Handled in the preprocessing and quantization steps inside the inference pipeline files of `NICE` (typically named `hw_inference.py` or `quantize.py`), where weights are mapped onto absolute positive ranges prior to noise injection.
 
 
 
 
 * **Conductance Variation & Parasitic Resistance ($IR$ Drop):**
-* 
-**Theory:** Modeling Gaussian device variations $\mathcal{N}(0, \sigma)$ on target cell conductances and constructing a matrix coefficient solver ($A_i \cdot V = B$) to compute localized wire voltage drops across row/column intersections.
+* **Theory:** Modeling Gaussian device variations $\mathcal{N}(0, \sigma)$ on target cell conductances and constructing a matrix coefficient solver ($A_i \cdot V = B$) to compute localized wire voltage drops across row/column intersections.
 
 
 * **Code Implementation:** Implemented in the matrix-solving subroutines of `NICE`. It overrides PyTorch's default linear/convolutional dot products with circuit-accurate solvers that iteratively compute row/column node voltages based on the metal line wire resistance ($r$) parameter.
@@ -55,8 +52,7 @@ The repository bridges the gap between software SNN execution and physical hardw
 
 
 * **The ELA Cost Formulas (Section IV-C):**
-* 
-**Theory:** Estimating total silicon surface area, operational latency budgets, and static/dynamic energy consumption (in $pJ$) based on technology node constants (65nm CMOS).
+* **Theory:** Estimating total silicon surface area, operational latency budgets, and static/dynamic energy consumption (in $pJ$) based on technology node constants (65nm CMOS).
 
 
 * **Code Implementation:** Contained within the main hardware estimation script, `ela_spikesim.py`. The file uses macro configuration variables to compute structural arrays (e.g., `pe_tile_count`, `adc_area`, `buffer_energy`).
@@ -86,8 +82,7 @@ The project follows a standard decoupled pipeline design pattern. The simulation
 
 #### The Data Lifecycle
 
-1. 
-**Ingestion:** Raw image datasets (e.g., CIFAR10) are transformed into input feature spaces using either **Direct Encoding** or **Poisson Rate Encoding**.
+1. **Ingestion:** Raw image datasets (e.g., CIFAR10) are transformed into input feature spaces using either **Direct Encoding** or **Poisson Rate Encoding**.
 
 
 2. **Functional Pipeline (NICE Loop):**
@@ -109,8 +104,7 @@ The project follows a standard decoupled pipeline design pattern. The simulation
 
 
 
-4. 
-**Logging & Outputs:** The framework outputs terminal readouts, `.csv` spreadsheets, or tensor logs detailing accuracy retention metrics alongside physical costs (Total Area in $mm^2$, Latency in $ns$, Energy per inference in $nJ$).
+4. **Logging & Outputs:** The framework outputs terminal readouts, `.csv` spreadsheets, or tensor logs detailing accuracy retention metrics alongside physical costs (Total Area in $mm^2$, Latency in $ns$, Energy per inference in $nJ$).
 
 
 
@@ -122,12 +116,10 @@ The project follows a standard decoupled pipeline design pattern. The simulation
 
 Configurations are managed via a centralized command-line interface argument parser setup (typically established in `args.py` or at the entry point of `hw_inference.py` and `ela_spikesim.py`), or through fixed hardware parameter dictionaries.
 
-* 
-**SNN Parameters:** `--ts` (Time-steps $T$), `--quant_bit` (Weight bit-width $k$), and threshold configurations are handled directly as command-line runtime flags.
+* **SNN Parameters:** `--ts` (Time-steps $T$), `--quant_bit` (Weight bit-width $k$), and threshold configurations are handled directly as command-line runtime flags.
 
 
-* 
-**Hardware Macro Specs:** Constants for the 65nm CMOS process node—such as device resistances ($R_{on}$/$R_{off}$), wire parasitic resistance ($r$), wire capacitance, operating voltage ($V_{DD}$), and component area footprints (e.g., flash ADC macro area)—are declared as hardcoded look-up fields inside the script files to guarantee consistency with the foundry models used in the study.
+* **Hardware Macro Specs:** Constants for the 65nm CMOS process node—such as device resistances ($R_{on}$/$R_{off}$), wire parasitic resistance ($r$), wire capacitance, operating voltage ($V_{DD}$), and component area footprints (e.g., flash ADC macro area)—are declared as hardcoded look-up fields inside the script files to guarantee consistency with the foundry models used in the study.
 
 
 
@@ -135,12 +127,10 @@ Configurations are managed via a centralized command-line interface argument par
 
 The codebase maps cleanly to the experimental setups detailed in the paper:
 
-* 
-**Quantization Context:** Setting weight parameters to 4-bit or 8-bit triggers the weight bit-splitting macro inside `ela_spikesim.py`. This automatically increases the column scaling logic factor (`np.ceil(args.quant_bit/bits_per_cell)`) to model the physical area of multi-column hardware layouts.
+* **Quantization Context:** Setting weight parameters to 4-bit or 8-bit triggers the weight bit-splitting macro inside `ela_spikesim.py`. This automatically increases the column scaling logic factor (`np.ceil(args.quant_bit/bits_per_cell)`) to model the physical area of multi-column hardware layouts.
 
 
-* 
-**Neuron Interleaving (NIC):** The configuration includes a `--mux_size` or `--interleave_factor` variable. When this factor is adjusted, the code scales down the total number of physical LIF modules allocated per PE while injecting appropriate multi-cycle latency penalties into the latency accumulator loops.
+* **Neuron Interleaving (NIC):** The configuration includes a `--mux_size` or `--interleave_factor` variable. When this factor is adjusted, the code scales down the total number of physical LIF modules allocated per PE while injecting appropriate multi-cycle latency penalties into the latency accumulator loops.
 
 
 
@@ -153,12 +143,10 @@ The codebase maps cleanly to the experimental setups detailed in the paper:
 Replicating the benchmarks in this paper requires a mix of deep learning and specialized scientific optimization packages:
 
 * **PyTorch (>= 1.10):** Used as the core tensor execution backend.
-* 
-**Torchvision:** Handles processing for standard datasets like CIFAR10, CIFAR100, and TinyImageNet.
+* **Torchvision:** Handles processing for standard datasets like CIFAR10, CIFAR100, and TinyImageNet.
 
 
-* 
-**SciPy / NumPy:** Crucial for the NICE circuit solver. The solver relies on highly optimized sparse matrix libraries (`scipy.sparse.linalg`) to solve massive linear network equations ($A \cdot V = B$) without crashing system memory.
+* **SciPy / NumPy:** Crucial for the NICE circuit solver. The solver relies on highly optimized sparse matrix libraries (`scipy.sparse.linalg`) to solve massive linear network equations ($A \cdot V = B$) without crashing system memory.
 
 
 
@@ -202,21 +190,17 @@ This command executes the structural mapping logic, applies the Neuron Interleav
 
 #### Theoretical Claims vs. Practical Implementation
 
-* 
-**Idealized Routing Topologies:** The paper discusses structured communications using Network-on-Chip (NoC) mesh configurations and intra-tile H-Tree routing. However, the code simplifies these routing estimations. Instead of simulating real-time link contention or dynamic packet collisions, it uses static mathematical distance lookups (e.g., Manhattan distance multipliers) to calculate routing latency.
+* **Idealized Routing Topologies:** The paper discusses structured communications using Network-on-Chip (NoC) mesh configurations and intra-tile H-Tree routing. However, the code simplifies these routing estimations. Instead of simulating real-time link contention or dynamic packet collisions, it uses static mathematical distance lookups (e.g., Manhattan distance multipliers) to calculate routing latency.
 
 
-* 
-**Thermal and Aging Variances:** The theoretical text notes that analog crossbars degrade under dynamic runtime variations. In practice, the code models this as static Gaussian noise added during initialization (`W_noisy = W_enc + noise`) rather than continuously varying the noise across successive temporal time-steps ($T$).
+* **Thermal and Aging Variances:** The theoretical text notes that analog crossbars degrade under dynamic runtime variations. In practice, the code models this as static Gaussian noise added during initialization (`W_noisy = W_enc + noise`) rather than continuously varying the noise across successive temporal time-steps ($T$).
 
 
-* 
-**Sparsity Assumptions:** The ELA engine assumes a uniform, constant spike sparsity metric across execution cycles. In a live hardware implementation, activation sparsity fluctuates dynamically based on the input images, which causes minor differences in real-world power usage compared to static software estimates.
+* **Sparsity Assumptions:** The ELA engine assumes a uniform, constant spike sparsity metric across execution cycles. In a live hardware implementation, activation sparsity fluctuates dynamically based on the input images, which causes minor differences in real-world power usage compared to static software estimates.
 
 
 
 #### Hardware Bottlenecks & Code Limitations
 
 * **NICE Memory Footprint:** The circuit solver loop represents a major computational bottleneck. Because the solver builds an interconnect node matrix for every single crossbar array allocation, processing large batches can lead to high CPU/GPU memory usage and long execution times. For larger networks, it is best to use a high-RAM workstation or restrict evaluation to small, targeted evaluation batches.
-* 
-**Strict Structural Constraints:** The tiling compiler code relies on a strict architectural boundary: individual layers can be partitioned across multiple processing tiles, but multiple small layers cannot be combined inside a single physical Tile. As a result, networks with very narrow early layers will see inflated area overheads in the ELA output report due to forced underutilization of the allocated tiles.
+* **Strict Structural Constraints:** The tiling compiler code relies on a strict architectural boundary: individual layers can be partitioned across multiple processing tiles, but multiple small layers cannot be combined inside a single physical Tile. As a result, networks with very narrow early layers will see inflated area overheads in the ELA output report due to forced underutilization of the allocated tiles.
